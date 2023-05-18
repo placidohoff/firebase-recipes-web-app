@@ -1,14 +1,39 @@
-import './App.css';
+import { useState } from 'react'
+import FirebaseAuthService from './FirebaseAuthService';
 
-// eslint-disable-next-line no-unused-vars
-import firebase from './FirebaseConfig';
+import './App.css';
+import LoginForm from './components/LoginForm';
+import AddEditRecipeForm from './components/AddEditRecipeForm';
 
 function App() {
+  const [user, setUser] = useState(null)
+  //Whenever there is a change in the user, we will call our custom handler which in this case is simply setState
+  FirebaseAuthService.subscribeToAuthChanges(setUser);
+
+  async function handleAddRecipe(newRecipe) {
+    try {
+
+      const response = await FirebaseAuthService.createDocument('Recipes', newRecipe);
+
+      //TODO: fetch new recipes from the firestore
+
+      alert(`Sucessfully created a recipe with an ID = ${response.id}`)
+    } catch (error) {
+
+      alert(error.message);
+
+    }
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>Recipes App</h1>
-      </header>
+      <div className="title-row">
+        <h1 className='title'>Recipes App</h1>
+        <LoginForm existingUser={user} />
+      </div>
+      <div className='main'>
+        <AddEditRecipeForm handleAddRecipe={handleAddRecipe} />
+      </div>
     </div>
   );
 }
